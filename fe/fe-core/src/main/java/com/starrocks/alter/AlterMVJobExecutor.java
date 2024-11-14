@@ -94,41 +94,22 @@ public class AlterMVJobExecutor extends AlterJobExecutor {
         Map<String, String> properties = modifyTablePropertiesClause.getProperties();
         Map<String, String> propClone = Maps.newHashMap();
         propClone.putAll(properties);
-        int partitionTTL = INVALID;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_PARTITION_TTL_NUMBER)) {
-            partitionTTL = PropertyAnalyzer.analyzePartitionTTLNumber(properties);
-        }
-        Pair<String, PeriodDuration> ttlDuration = null;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_PARTITION_TTL)) {
-            ttlDuration = PropertyAnalyzer.analyzePartitionTTL(properties, true);
-        }
-        int partitionRefreshNumber = INVALID;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_PARTITION_REFRESH_NUMBER)) {
-            partitionRefreshNumber = PropertyAnalyzer.analyzePartitionRefreshNumber(properties);
-        }
-        String resourceGroup = null;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_RESOURCE_GROUP)) {
-            resourceGroup = PropertyAnalyzer.analyzeResourceGroup(properties);
-            properties.remove(PropertyAnalyzer.PROPERTIES_RESOURCE_GROUP);
-        }
-        int autoRefreshPartitionsLimit = INVALID;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_AUTO_REFRESH_PARTITIONS_LIMIT)) {
-            autoRefreshPartitionsLimit = PropertyAnalyzer.analyzeAutoRefreshPartitionsLimit(properties, materializedView);
-        }
-        List<TableName> excludedTriggerTables = Lists.newArrayList();
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_EXCLUDED_TRIGGER_TABLES)) {
-            excludedTriggerTables = PropertyAnalyzer.analyzeExcludedTables(properties,
+        int partitionTTL = PropertyAnalyzer.analyzePartitionTTLNumber(properties);
+        int lifeStyle = PropertyAnalyzer.analyzeLifeStyle(properties);
+        Pair<String, PeriodDuration> ttlDuration = PropertyAnalyzer.analyzePartitionTTL(properties, true);
+        int partitionRefreshNumber = PropertyAnalyzer.analyzePartitionRefreshNumber(properties);
+
+        String resourceGroup = PropertyAnalyzer.analyzeResourceGroup(properties);
+        properties.remove(PropertyAnalyzer.PROPERTIES_RESOURCE_GROUP);
+
+        int autoRefreshPartitionsLimit = PropertyAnalyzer.analyzeAutoRefreshPartitionsLimit(properties, materializedView);
+
+        List<TableName> excludedTriggerTables = PropertyAnalyzer.analyzeExcludedTables(properties,
                     PropertyAnalyzer.PROPERTIES_EXCLUDED_TRIGGER_TABLES, materializedView);
-        }
-        List<TableName> excludedRefreshBaseTables = Lists.newArrayList();
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_EXCLUDED_REFRESH_TABLES)) {
-            excludedRefreshBaseTables = PropertyAnalyzer.analyzeExcludedTables(properties,
+        List<TableName> excludedRefreshBaseTables = PropertyAnalyzer.analyzeExcludedTables(properties,
                     PropertyAnalyzer.PROPERTIES_EXCLUDED_REFRESH_TABLES, materializedView);
-        }
-        int maxMVRewriteStaleness = INVALID;
-        if (properties.containsKey(PropertyAnalyzer.PROPERTIES_MV_REWRITE_STALENESS_SECOND)) {
-            maxMVRewriteStaleness = PropertyAnalyzer.analyzeMVRewriteStaleness(properties);
-        }
+        int maxMVRewriteStaleness = PropertyAnalyzer.analyzeMVRewriteStaleness(properties);
+
         List<UniqueConstraint> uniqueConstraints = Lists.newArrayList();
         if (properties.containsKey(PropertyAnalyzer.PROPERTIES_UNIQUE_CONSTRAINT)) {
             uniqueConstraints = PropertyAnalyzer.analyzeUniqueConstraint(properties, db, materializedView);
@@ -306,6 +287,14 @@ public class AlterMVJobExecutor extends AlterJobExecutor {
             materializedView.getTableProperty().setMvTransparentRewriteMode(mvTransparentRewriteMode);
             isChanged = true;
         }
+        if (propClone.containsKey(PropertyAnalyzer.PROPERTIES_LIFESTYLE)) {
+            curProp.put(PropertyAnalyzer.PROPERTIES_LIFESTYLE,
+                    propClone.get(PropertyAnalyzer.PROPERTIES_LIFESTYLE));
+            materializedView.setLifeStyle(lifeStyle);
+            isChanged = true;
+        }
+
+
         DynamicPartitionUtil.registerOrRemovePartitionTTLTable(materializedView.getDbId(), materializedView);
         if (!properties.isEmpty()) {
             // set properties if there are no exceptions

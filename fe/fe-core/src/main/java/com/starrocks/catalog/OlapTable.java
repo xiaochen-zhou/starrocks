@@ -272,7 +272,7 @@ public class OlapTable extends Table {
     protected BinlogConfig curBinlogConfig;
 
     // After ensuring that all binlog config of tablets in BE have taken effect,
-    // apply for a transaction id as binlogtxnId.
+    // apply for a transaction id as binlog txnId.
     // The purpose is to ensure that in the case of concurrent imports,
     // need to wait for the completion of concurrent imports,
     // that is, all transactions which id is smaller than binlogTxnId have been

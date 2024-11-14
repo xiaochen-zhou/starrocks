@@ -40,6 +40,7 @@ import com.starrocks.common.Config;
 import com.starrocks.common.FeConstants;
 import com.starrocks.common.MaterializedViewExceptions;
 import com.starrocks.common.Pair;
+import com.starrocks.common.RetriableException;
 import com.starrocks.common.UserException;
 import com.starrocks.common.profile.Timer;
 import com.starrocks.common.profile.Tracers;
@@ -371,21 +372,19 @@ public class PartitionBasedMvRefreshProcessor extends BaseTaskRunProcessor {
                 Tracers.record("MVRefreshRetryTimes", String.valueOf(refreshFailedTimes));
                 Tracers.record("MVRefreshLockRetryTimes", String.valueOf(lockFailedTimes));
                 return doRefreshMaterializedView(taskRunContext, mvEntity);
-            } catch (LockTimeoutException e) {
-                // if lock timeout, retry to refresh
-                lockFailedTimes += 1;
-                LOG.warn("Refresh materialized view {} failed at {}th time because try lock failed: {}",
-                        this.materializedView.getName(), lockFailedTimes, DebugUtil.getStackTrace(e));
-                lastException = e;
             } catch (Throwable e) {
-                refreshFailedTimes += 1;
-                LOG.warn("Refresh materialized view {} failed at {}th time: {}",
-                        this.materializedView.getName(), refreshFailedTimes, DebugUtil.getRootStackTrace(e));
-                lastException = e;
-            }
+                // if lock timeout, retry to refresh
+                if(e instanceof RetriableException){
+                    refreshFailedTimes += 1;
+                    LOG.warn("Refresh materialized view {} failed at {}th time: {}",
+                            this.materializedView.getName(), refreshFailedTimes, DebugUtil.getRootStackTrace(e));
+                    lastException = e;
+                    // sleep some time if it is not the last retry time
+                    Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
+                }
+                break;
 
-            // sleep some time if it is not the last retry time
-            Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
+            }
         }
 
         // throw the last exception if all retries failed
@@ -423,7 +422,7 @@ public class PartitionBasedMvRefreshProcessor extends BaseTaskRunProcessor {
                         materializedView.getName(), DebugUtil.getRootStackTrace(e));
                 // Since at here we sync partitions before the refreshExternalTable, the situation may happen that
                 // the base-table not exists before refreshExternalTable, so we just need to swallow this exception
-                if (e.getMessage() == null || !e.getMessage().contains("not exist")) {
+                if (e instanceof LockTimeoutException || e.getMessage() == null || !e.getMessage().contains("not exist")) {
                     throw e;
                 }
             }
@@ -1105,7 +1104,8 @@ public class PartitionBasedMvRefreshProcessor extends BaseTaskRunProcessor {
             }
         } catch (UserException e) {
             LOG.warn("Materialized view compute partition change failed", DebugUtil.getRootStackTrace(e));
-            return true;
+//            return true;
+            return e.isRetriable();
         }
         return false;
     }

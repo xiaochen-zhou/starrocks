@@ -30,6 +30,7 @@ import java.util.Set;
 public class MVRefreshParams {
     private final String rangeStart;
     private final String rangeEnd;
+    private final String refreshStrategy;
     private final boolean isForce;
     private final Set<PListCell> listValues;
     private final PartitionInfo mvPartitionInfo;

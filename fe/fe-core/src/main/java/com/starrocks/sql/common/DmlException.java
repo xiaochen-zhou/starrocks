@@ -14,9 +14,11 @@
 
 package com.starrocks.sql.common;
 
+import com.starrocks.common.NoRetriableException;
+
 import static java.lang.String.format;
 
-public class DmlException extends RuntimeException {
+public class DmlException extends NoRetriableException {
     public DmlException(String message) {
         super(message);
     }

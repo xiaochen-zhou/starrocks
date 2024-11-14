@@ -11,16 +11,30 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.starrocks.common.util.concurrent.lock;
 
-import com.starrocks.common.RetriableException;
 
-public class LockException extends RetriableException {
-    public LockException(String msg) {
-        super(msg);
+package com.starrocks.common;
+
+public abstract class NoRetriableException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public NoRetriableException(String message) {
+        super(message);
     }
 
-    public LockException(String msg, Exception e) {
-        super(msg, e);
+    public NoRetriableException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public NoRetriableException(Throwable cause) {
+        super(cause);
+    }
+
+
+    public NoRetriableException(String s, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+
+
+
     }
 }

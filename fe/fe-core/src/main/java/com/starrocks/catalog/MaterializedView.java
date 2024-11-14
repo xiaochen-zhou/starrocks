@@ -245,6 +245,9 @@ public class MaterializedView extends OlapTable implements GsonPreProcessable, G
         @SerializedName(value = "timeUnit")
         private String timeUnit;
 
+        @SerializedName(value = "lifeStyle")
+        private Integer lifeStyle;
+
         public AsyncRefreshContext() {
             this.baseTableVisibleVersionMap = Maps.newConcurrentMap();
             this.baseTableInfoVisibleVersionMap = Maps.newConcurrentMap();
@@ -253,6 +256,7 @@ public class MaterializedView extends OlapTable implements GsonPreProcessable, G
             this.startTime = Utils.getLongFromDateTime(LocalDateTime.now());
             this.step = 0;
             this.timeUnit = null;
+            this.lifeStyle = null;
         }
 
         public Map<Long, Map<String, BasePartitionInfo>> getBaseTableVisibleVersionMap() {
@@ -502,6 +506,14 @@ public class MaterializedView extends OlapTable implements GsonPreProcessable, G
     private long warehouseId = WarehouseManager.DEFAULT_WAREHOUSE_ID;
 
     protected volatile ParseNode defineQueryParseNode = null;
+
+    public Integer getLifeStyle() {
+        return lifeStyle;
+    }
+
+    public void setLifeStyle(Integer lifeStyle) {
+        this.lifeStyle = lifeStyle;
+    }
 
     public MaterializedView() {
         super(TableType.MATERIALIZED_VIEW);

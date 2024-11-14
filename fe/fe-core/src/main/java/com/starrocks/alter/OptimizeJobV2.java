@@ -317,7 +317,7 @@ public class OptimizeJobV2 extends AlterJobV2 implements GsonPostProcessable {
         // and the job will be in RUNNING state forever.
         Database db = GlobalStateMgr.getCurrentState().getLocalMetastore().getDb(dbId);
         if (db == null) {
-            throw new AlterCancelException("Databasee " + dbId + " does not exist");
+            throw new AlterCancelException("Database " + dbId + " does not exist");
         }
 
         OlapTable tbl = (OlapTable) GlobalStateMgr.getCurrentState().getLocalMetastore().getTable(db.getId(), tableId);

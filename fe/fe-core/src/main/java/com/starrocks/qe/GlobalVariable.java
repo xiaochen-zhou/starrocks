@@ -74,6 +74,9 @@ public final class GlobalVariable {
     public static final String QUERY_QUEUE_CPU_USED_PERMILLE_LIMIT = "query_queue_cpu_used_permille_limit";
     public static final String QUERY_QUEUE_PENDING_TIMEOUT_SECOND = "query_queue_pending_timeout_second";
     public static final String QUERY_QUEUE_MAX_QUEUED_QUERIES = "query_queue_max_queued_queries";
+    public static final String CPU_COST_WEIGHT = "cpu_cost_weight";
+    public static final String NETWORK_COST_WEIGHT = "network_cost_weight";
+    public static final String MEMORY_COST_WEIGHT = "memory_cost_weight";
     public static final String ACTIVATE_ALL_ROLES_ON_LOGIN = "activate_all_roles_on_login";
     public static final String ACTIVATE_ALL_ROLES_ON_LOGIN_V2 = "activate_all_roles_on_login_v2";
     public static final String ENABLE_TDE = "enable_tde";
@@ -178,6 +181,16 @@ public final class GlobalVariable {
     @VariableMgr.VarAttr(name = ENABLE_TDE, flag = VariableMgr.GLOBAL | VariableMgr.READ_ONLY)
     public static boolean enableTde = KeyMgr.isEncrypted();
 
+    @VariableMgr.VarAttr(name = CPU_COST_WEIGHT, flag = VariableMgr.GLOBAL)
+    public static final double cpuCostWeight = 0.5;
+
+    @VariableMgr.VarAttr(name = MEMORY_COST_WEIGHT, flag = VariableMgr.GLOBAL)
+    public static final double memoryCostWeight = 2;
+
+    @VariableMgr.VarAttr(name = NETWORK_COST_WEIGHT, flag = VariableMgr.GLOBAL)
+    public static final double networkCostWeight = 1.5;
+
+
     public static boolean isEnableQueryQueueSelect() {
         return enableQueryQueueSelect;
     }
@@ -200,6 +213,18 @@ public final class GlobalVariable {
 
     public static void setEnableQueryQueueLoad(boolean enableQueryQueueLoad) {
         GlobalVariable.enableQueryQueueLoad = enableQueryQueueLoad;
+    }
+
+    public static double getCpuCostWeight() {
+        return cpuCostWeight;
+    }
+
+    public static double getMemoryCostWeight() {
+        return cpuCostWeight;
+    }
+
+    public static double getNetworkCostWeight() {
+        return cpuCostWeight;
     }
 
     public static boolean isEnableGroupLevelQueryQueue() {
@@ -240,6 +265,7 @@ public final class GlobalVariable {
         }
         return queryQueueDriverHighWater;
     }
+
 
     public static void setQueryQueueDriverHighWater(int queryQueueDriverHighWater) {
         GlobalVariable.queryQueueDriverHighWater = queryQueueDriverHighWater;

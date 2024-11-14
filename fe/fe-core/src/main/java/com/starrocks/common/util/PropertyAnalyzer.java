@@ -190,6 +190,7 @@ public class PropertyAnalyzer {
     public static final String PROPERTIES_ENABLE_ASYNC_WRITE_BACK = "enable_async_write_back";
     public static final String PROPERTIES_PARTITION_TTL_NUMBER = "partition_ttl_number";
     public static final String PROPERTIES_PARTITION_TTL = "partition_ttl";
+    public static final String PROPERTIES_LIFESTYLE = "mv_lifestyle";
     public static final String PROPERTIES_PARTITION_LIVE_NUMBER = "partition_live_number";
     public static final String PROPERTIES_AUTO_REFRESH_PARTITIONS_LIMIT = "auto_refresh_partitions_limit";
     public static final String PROPERTIES_PARTITION_REFRESH_NUMBER = "partition_refresh_number";
@@ -346,6 +347,26 @@ public class PropertyAnalyzer {
         return new DataProperty(storageMedium, coolDownTimeStamp);
     }
 
+    public static short analyzeCpuCostWeight(Map<String, String> properties) throws AnalysisException {
+        short cpuCostWeight = 1;
+        if (properties != null && properties.containsKey(PROPERTY_CPU_COST_WEIGHT)) {
+            // check and use specified short key
+            try {
+                cpuCostWeight = Short.parseShort(properties.get(PROPERTY_CPU_COST_WEIGHT));
+            } catch (NumberFormatException e) {
+                throw new AnalysisException("Short key: " + e.getMessage());
+            }
+
+            if (cpuCostWeight <= 0) {
+                throw new AnalysisException("Short key column count should larger than 0.");
+            }
+
+            properties.remove(PROPERTY_CPU_COST_WEIGHT);
+        }
+
+        return cpuCostWeight;
+    }
+
     public static short analyzeShortKeyColumnCount(Map<String, String> properties) throws AnalysisException {
         short shortKeyColumnCount = (short) -1;
         if (properties != null && properties.containsKey(PROPERTIES_SHORT_KEY)) {
@@ -364,6 +385,22 @@ public class PropertyAnalyzer {
         }
 
         return shortKeyColumnCount;
+    }
+
+    public static int analyzeLifeStyle(Map<String, String> properties) {
+        int lifeStyle = INVALID;
+        if (properties != null && properties.containsKey(PROPERTIES_LIFESTYLE)) {
+            try {
+                lifeStyle = Integer.parseInt(properties.get(PROPERTIES_LIFESTYLE));
+            } catch (NumberFormatException e) {
+                throw new SemanticException("Partition TTL Number: " + e.getMessage());
+            }
+            if (lifeStyle <= 0 && lifeStyle != INVALID) {
+                throw new SemanticException("Illegal MV LifeStyle: " + lifeStyle);
+            }
+            properties.remove(PROPERTIES_LIFESTYLE);
+        }
+        return lifeStyle;
     }
 
     public static int analyzePartitionTTLNumber(Map<String, String> properties) {

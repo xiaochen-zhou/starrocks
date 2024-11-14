@@ -39,32 +39,48 @@ import com.google.common.base.Strings;
 /**
  * Thrown for internal server errors.
  */
-public class UserException extends Exception {
+public class UserException extends NoRetriableException {
     private final InternalErrorCode errorCode;
+    private final boolean isRetriable;
 
     public UserException(String msg, Throwable cause) {
         super(Strings.nullToEmpty(msg), cause);
         errorCode = InternalErrorCode.INTERNAL_ERR;
+        this.isRetriable = true;
     }
 
     public UserException(Throwable cause) {
         super(cause);
         errorCode = InternalErrorCode.INTERNAL_ERR;
+        this.isRetriable = true;
     }
 
     public UserException(String msg, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(Strings.nullToEmpty(msg), cause, enableSuppression, writableStackTrace);
         errorCode = InternalErrorCode.INTERNAL_ERR;
+        this.isRetriable = true;
     }
 
     public UserException(String msg) {
         super(Strings.nullToEmpty(msg));
         errorCode = InternalErrorCode.INTERNAL_ERR;
+        this.isRetriable = true;
     }
 
     public UserException(InternalErrorCode errCode, String msg) {
         super(Strings.nullToEmpty(msg));
         this.errorCode = errCode;
+        this.isRetriable = true;
+    }
+
+    public boolean isRetriable() {
+        return isRetriable;
+    }
+
+    public UserException(InternalErrorCode errCode, String msg, boolean isRetriable) {
+        super(Strings.nullToEmpty(msg));
+        this.errorCode = errCode;
+        this.isRetriable = isRetriable;
     }
 
     public InternalErrorCode getErrorCode() {

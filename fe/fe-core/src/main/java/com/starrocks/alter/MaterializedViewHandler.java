@@ -458,7 +458,6 @@ public class MaterializedViewHandler extends AlterHandler {
             }
 
             // check if mv index already exists in db
-
             if (GlobalStateMgr.getCurrentState().getLocalMetastore().mayGetTable(db.getFullName(), mvName).isPresent()) {
                 throw new DdlException("Table [" + mvName + "] already exists in the db " + db.getFullName());
             }
